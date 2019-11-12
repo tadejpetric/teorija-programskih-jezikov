@@ -1,0 +1,9 @@
+LET fst = FUN tuple -> FST tuple IN
+LET snd = FUN tuple -> SND tuple IN
+LET REC map f = FUN list -> (
+    MATCH list WITH
+    | [] -> []
+    | x :: xs -> (f x) :: ((map f) xs)
+) IN
+LET split = FUN listx -> {map fst listx, map snd listx} 
+IN split ({1,2}::({2,3}::({3,4}::([]))))
