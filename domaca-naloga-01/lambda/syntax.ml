@@ -51,10 +51,10 @@ let rec subst sbst = function
   | Nil -> Nil
   | Cons (e1, e2) -> Cons (subst sbst e1, subst sbst e2)
   | Match (e, e1, x, xs, e2) ->
-    let sbst' = List.remove_assoc x sbst
-    and sbst'' = List.remove_assoc xs sbst in
+    let sbst' = List.remove_assoc x sbst in
+    let sbst'' = List.remove_assoc xs sbst' in 
     Match (subst sbst e, (* thing to match on *)
-           subst sbst' e1, (* expression for empty list *)
+           subst sbst e1, (* expression for empty list *)
            x, (* head *)
            xs, (* tail *)
            subst sbst'' e2) (* expression for non-empty list *)

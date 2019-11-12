@@ -90,10 +90,10 @@ and eval_int e =
 
 
 let rec step = function
-  | S.Var _ | S.Int _ | S.Bool _ | S.Lambda _ | S.RecLambda _ | S.Nil -> failwith "Expected a non-terminal expression"
-  | S.Pair (x, y) when (is_value x && is_value y) -> failwith "Expected non-terminal expression"
-  | S.Cons _ as x when is_value x -> failwith "Expected non-terminal expression"
-  | S.Pair _ as x when is_value x -> failwith "Expected non-terminal expression"
+  | S.Var _ | S.Int _ | S.Bool _ | S.Lambda _ | S.RecLambda _ -> failwith "Expected a non-terminal expression got whatever"
+  | S.Nil -> S.Nil
+  | S.Cons _ as x when is_value x -> failwith "Expected non-terminal expression got list"
+  | S.Pair _ as x when is_value x -> failwith "Expected non-terminal expression got pair"
   | S.Plus (S.Int n1, S.Int n2) -> S.Int (n1 + n2)
   | S.Plus (S.Int n1, e2) -> S.Plus (S.Int n1, step e2)
   | S.Plus (e1, e2) -> S.Plus (step e1, e2)
@@ -140,7 +140,7 @@ let rec step = function
       | S.Cons (car, cdr) ->
         let newcont = S.subst [(x, car)] e2
         in step (S.subst [(xs, cdr)] newcont)
-      | _ -> failwith "list expected"
+      | _ -> failwith "List expected in match clause"
     end
 
 let big_step e =
