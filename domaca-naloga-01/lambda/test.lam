@@ -1,0 +1,2 @@
+LET REC buildsez n = IF n = 0 THEN [] ELSE  2 ::(buildsez (n-1))
+IN buildsez 5
