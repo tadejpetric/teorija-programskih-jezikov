@@ -1,2 +1,4 @@
-LET REC buildsez n = IF n = 0 THEN [] ELSE  2 ::(buildsez (n-1))
-IN buildsez 5
+LET fst = FUN a -> FST a
+IN
+(LET REC f x = (f 3)
+IN (fst ({21, (f 5)})))

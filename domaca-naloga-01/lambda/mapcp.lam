@@ -1,0 +1,6 @@
+LET arr = 1::2::3::4::[]
+IN LET REC display sez = 
+    MATCH sez WITH
+    | [] -> []
+    | x :: xs -> (IF x = 5 THEN x ELSE (x + 10)) :: (display xs)
+IN FST ( SND (display arr))
