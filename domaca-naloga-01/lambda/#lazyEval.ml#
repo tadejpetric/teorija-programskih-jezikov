@@ -113,8 +113,6 @@ let rec step = function
   | S.Apply (S.Lambda (x, e), v)-> S.subst [(x, v)] e
   | S.Apply (S.RecLambda (f, x, e) as rec_f, v) -> S.subst [(f, rec_f); (x, v)] e
   | S.Apply (e1, e2) -> S.Apply (step e1, e2)
-  (*| S.Pair (first, second) -> S.Pair (first, second)
-    | S.Cons (car, cdr) -> S.Cons (car, cdr)*)
   | S.Fst (S.Pair (x, y)) -> x
   | S.Fst (S.Cons (car, cdr)) -> step car (* acts as head *)
   | S.Fst x when is_value x -> failwith "Expected list or pair for Fst, got some other value"

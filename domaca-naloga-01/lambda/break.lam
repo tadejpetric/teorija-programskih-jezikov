@@ -1,2 +1,1 @@
-LET f = FUN x -> x + x 
-IN (FUN f -> f - f) 3
+(FUN x -> FUN y -> x) y
