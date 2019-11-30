@@ -133,13 +133,13 @@ let rec step = function
       | S.Cons (car, cdr) as a when is_value a -> cdr (* Makes life easier *)
       | S.Pair (car, cdr) as a when is_value a -> cdr
       | a when is_value a -> failwith "expected pair or list for Fst"
-      | _ -> S.Fst (step contents) )
+      | _ -> S.Snd (step contents) )
   | S.Match (e, e1, x, xs, e2) ->
     begin match e with
-      | S.Nil -> step e1
+      | S.Nil -> e1
       | S.Cons (car, cdr) as lst when is_value lst ->
         let newcont = S.subst [(x, car)] e2
-        in step (S.subst [(xs, cdr)] newcont)
+        in (S.subst [(xs, cdr)] newcont)
       | a when is_value a -> failwith "List expected in match clause"
       | a -> S.Match(step a, e1, x, xs, e2)
     end

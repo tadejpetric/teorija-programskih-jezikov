@@ -75,7 +75,8 @@ let rec eval_exp = function
       | S.Cons (car, cdr) ->
         let newcont = S.subst [(x, car)] e2
         in eval_exp (S.subst [(xs, cdr)] newcont)
-      | _ -> failwith "list expected"
+      | a when is_value a -> failwith "List expected in match clause"
+      | a -> S.Match(eval_exp a, e1, x, xs, e2)
     end
 
 
@@ -110,24 +111,25 @@ let rec step = function
   | S.Greater (e1, e2) -> S.Greater (step e1, e2)
   | S.IfThenElse (S.Bool b, e1, e2) -> if b then e1 else e2
   | S.IfThenElse (e, e1, e2) -> S.IfThenElse (step e, e1, e2)
-  | S.Apply (S.Lambda (x, e), v)-> S.subst [(x, v)] e
+  | S.Apply (S.Lambda (x, e), v) -> S.subst [(x, v)] e
   | S.Apply (S.RecLambda (f, x, e) as rec_f, v) -> S.subst [(f, rec_f); (x, v)] e
   | S.Apply (e1, e2) -> S.Apply (step e1, e2)
   | S.Fst (S.Pair (x, y)) -> x
-  | S.Fst (S.Cons (car, cdr)) -> step car (* acts as head *)
+  | S.Fst (S.Cons (car, cdr)) -> car (* acts as head *)
   | S.Fst x when is_value x -> failwith "Expected list or pair for Fst, got some other value"
   | S.Fst x -> S.Fst (step x)
   | S.Snd (S.Pair (x, y)) -> y
-  | S.Snd (S.Cons (car, cdr)) -> step cdr (* acts as tail *)
+  | S.Snd (S.Cons (car, cdr)) -> cdr (* acts as tail *)
   | S.Snd x when is_value x -> failwith "Expected list or pair for Snd, got some other value"
   | S.Snd x -> S.Snd (step x)
   | S.Match (e, e1, x, xs, e2) ->
     begin match e with
-      | S.Nil -> step e1
+      | S.Nil -> e1
       | S.Cons (car, cdr) ->
         let newcont = S.subst [(x, car)] e2
-        in step (S.subst [(xs, cdr)] newcont)
-      | _ as a -> step a (*failwith "List expected in match clause"*)
+        in (S.subst [(xs, cdr)] newcont)
+      | a when is_value a -> failwith "List expected in match clause"
+      | a -> S.Match(step a, e1, x, xs, e2)
     end
 
 

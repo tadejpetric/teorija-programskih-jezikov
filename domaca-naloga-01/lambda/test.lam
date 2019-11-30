@@ -1,4 +1,0 @@
-LET fst = FUN a -> FST a
-IN
-(LET REC f x = (f 3)
-IN (fst ( 21::(f 5)::[] )))

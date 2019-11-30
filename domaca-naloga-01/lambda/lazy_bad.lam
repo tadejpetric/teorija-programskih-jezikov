@@ -1,0 +1,2 @@
+LET REC fact n = (IF n = 0 THEN 1 ELSE (n * (fact (n-1))))
+IN (FUN x -> x-x+x-x+x-x+x-x+x-x+x-x) (fact 42)
