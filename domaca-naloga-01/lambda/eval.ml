@@ -76,12 +76,6 @@ let rec eval_exp = function
         in eval_exp (S.subst [(xs, cdr)] newcont)
       | _ -> failwith "list expected"
     end
-  (* for lazy evaluation
-  | S.Pair (e1, e2) ->
-    let n1 = eval_int e1
-    and n2 = eval_int e2
-        in S.Pair(n1, n2) *)
-
 
 and eval_int e =
   match eval_exp e with
@@ -128,19 +122,26 @@ let rec step = function
       S.Cons (car, step cdr)
     else
       S.Cons (step car, cdr)
-  | S.Fst (S.Pair (x, y)) -> x
-  | S.Fst (S.Cons (car, cdr)) -> step car (* why not *)
-  | S.Fst _ -> failwith "expected list or pair for Fst"
-  | S.Snd (S.Pair (x, y)) -> y
-  | S.Snd (S.Cons (car, cdr)) -> step cdr (* acts as tail *)
-  | S.Snd _ -> failwith "expected list or pair for Snd"
+  | S.Fst (contents) -> (
+    match contents with
+    | S.Cons (car, cdr) as a when is_value a -> car (* Makes life easier *)
+    | S.Pair (car, cdr) as a when is_value a -> car
+    | a when is_value a -> failwith "expected pair or list for Fst"
+    | _ -> S.Fst (step contents) )
+  | S.Snd (contents) -> (
+      match contents with
+      | S.Cons (car, cdr) as a when is_value a -> cdr (* Makes life easier *)
+      | S.Pair (car, cdr) as a when is_value a -> cdr
+      | a when is_value a -> failwith "expected pair or list for Fst"
+      | _ -> S.Fst (step contents) )
   | S.Match (e, e1, x, xs, e2) ->
     begin match e with
       | S.Nil -> step e1
-      | S.Cons (car, cdr) ->
+      | S.Cons (car, cdr) as lst when is_value lst ->
         let newcont = S.subst [(x, car)] e2
         in step (S.subst [(xs, cdr)] newcont)
-      | _ -> failwith "List expected in match clause"
+      | a when is_value a -> failwith "List expected in match clause"
+      | a -> S.Match(step a, e1, x, xs, e2)
     end
 
 let big_step e =

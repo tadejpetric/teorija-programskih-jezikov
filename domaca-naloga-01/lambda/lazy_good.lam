@@ -1,0 +1,2 @@
+LET REC f x = 2::(f x)
+IN ( MATCH (f []) WITH | [] -> 1 | x :: xs -> 2)
