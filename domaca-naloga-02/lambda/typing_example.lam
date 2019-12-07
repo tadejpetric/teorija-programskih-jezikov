@@ -1,0 +1,1 @@
+FUN f -> (FUN x -> f (FST x) (SND x))
