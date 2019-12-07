@@ -42,8 +42,24 @@ let rec infer_exp ctx = function
       and a = fresh_ty ()
       in
       a, [(t1, S.ArrowTy (t2, a))] @ eqs1 @ eqs2
-
-
+  | S.Nil -> S.ListTy (fresh_ty ()), []
+  | S.Cons (e, es) ->
+    let a, eqs1 = infer_exp ctx e
+    and b, eqs2 = infer_exp ctx es in
+    S.ListTy a, [(S.ListTy a, b)] @ eqs1 @ eqs2
+                (* todo match *)
+  | S.Pair (car, cdr) ->
+    let a, eqs1 = infer_exp ctx car
+    and b, eqs2 = infer_exp ctx cdr in
+    S.ProdTy (a, b), eqs1 @ eqs2
+  | S.Fst e ->
+    let a, eqs = infer_exp ctx e
+    and a_new, b_new = fresh_ty (), fresh_ty () in
+    a_new, (S.ProdTy (a_new, b_new), a) :: eqs
+  | S.Snd e ->
+    let a, eqs = infer_exp ctx e
+    and a_new, b_new = fresh_ty (), fresh_ty () in
+    b_new, (S.ProdTy (a_new, b_new), a) :: eqs
 
 let subst_equations sbst =
   (* Substitutes type parameters for types in equations. *)
@@ -62,6 +78,8 @@ let rec occurs a = function
   | S.ParamTy a' -> a = a'
   | S.IntTy | S.BoolTy -> false
   | S.ArrowTy (t1, t2) -> occurs a t1 || occurs a t2
+  | S.ProdTy (t1, t2) -> occurs a t1 || occurs a t2
+  | S.ListTy (t1, t2) -> occurs a t1 || occurs a t2
 
 
 let rec solve sbst = function
