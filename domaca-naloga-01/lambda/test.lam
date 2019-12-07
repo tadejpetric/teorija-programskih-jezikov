@@ -1,1 +1,0 @@
-(FUN a -> a + 1) 1 :: (((REC map f -> FUN list -> MATCH list WITH | [] -> [] | x :: xs -> f x :: (map f) xs) (FUN a -> a + 1)) (2 :: 3 :: 4 :: []))

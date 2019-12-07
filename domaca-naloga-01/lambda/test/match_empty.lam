@@ -1,3 +1,0 @@
-MATCH [] WITH
-| [] -> TRUE
-| x :: xs -> FALSE
