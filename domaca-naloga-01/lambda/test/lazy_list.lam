@@ -1,0 +1,2 @@
+LET REC f x = x :: f (x + 1)
+IN f 3
