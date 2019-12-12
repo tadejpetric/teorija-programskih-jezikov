@@ -577,5 +577,31 @@ begin
           exact (step.snd_step h_h),
       },
   },
-  case of.list_match {sorry,},
+  case of.list_match {
+      -- can always make a step
+      right,
+      cases H_ih_a empty,
+      case or.inl {
+          cases H_e,
+          case tm.cons {
+              existsi (subst H_x H_e_a (subst H_xs H_e_a_1 H_e2)),
+              exact (step.list_match_cons),
+          },
+          case tm.nil {
+              existsi H_e1,
+              exact (step.list_match_nil),
+          },
+          repeat {
+              cases H_a,
+              },
+          repeat {
+              cases h,
+          },
+      },
+      case or.inr {
+          cases h,
+          existsi (tm.list_match h_w H_e1 H_x H_xs H_e2),
+          exact (step.list_match_step h_h),
+      },
+  },
 end
