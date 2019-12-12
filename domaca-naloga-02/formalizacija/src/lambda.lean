@@ -389,7 +389,9 @@ begin
     },
     case step.list_match_step {
         cases Hof,
-        sorry,
+        have temp : of Γ Hstep_e' (ty.list Hof_A),
+        apply Hstep_ih Hof_a,
+        apply of.list_match temp Hof_a_1 Hof_a_2,
     },
     case step.list_match_nil {
         cases Hof,
@@ -398,7 +400,11 @@ begin
     case step.list_match_cons {
         cases Hof,
         cases Hof_a,
-        sorry,
+        apply substitution Hof_a_a,
+        apply substitution,
+        apply weakening,
+        assumption,
+        assumption,
     },
 end
 
