@@ -296,7 +296,12 @@ lemma weakening {Γ e A x B} :
     of Γ e A -> of (ctx.cons Γ x B) e A
 :=
 begin
-    sorry
+    intros Hstep,
+    induction Hstep,
+    case of.var {
+        cases Hstep_a,
+    },
+    repeat {sorry,}
 end
 
 
