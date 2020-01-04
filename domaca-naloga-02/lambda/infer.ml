@@ -115,11 +115,10 @@ let rec renaming sbst = function
       then sbst
       else (a, S.ParamTy (S.Param (List.length sbst))) :: sbst
   | S.IntTy | S.BoolTy -> sbst
-  | S.ArrowTy (t1, t2) ->
+  | S.ArrowTy (t1, t2) | S.ProdTy (t1, t2) ->
       let sbst' = renaming sbst t1 in
       renaming sbst' t2
-  | ProdTy (t1, t2) -> sbst
-  | ListTy t -> sbst
+  | ListTy t -> renaming sbst t
 
 
 let infer e =

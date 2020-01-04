@@ -140,8 +140,9 @@ inductive lookup : ident -> ctx -> ty -> Prop
     x ≠ y ->
     lookup x Γ A ->
     lookup x (ctx.cons Γ y B) A
+-- 
 
-
+--
 inductive of : ctx -> tm -> ty -> Prop
 | var {x Γ A} :
     lookup x Γ A ->
@@ -295,7 +296,12 @@ lemma weakening {Γ e A x B} :
     of Γ e A -> of (ctx.cons Γ x B) e A
 :=
 begin
-    sorry
+    intros Hstep,
+    induction Hstep,
+    case of.var {
+        cases Hstep_a,
+    },
+    repeat {sorry,}
 end
 
 
@@ -342,9 +348,70 @@ begin
         cases Hof,
         apply Hof_a_2
     },
-    repeat {sorry},
+    case step.pair1 {
+        cases Hof,
+        apply of.pair,
+        apply Hstep_ih Hof_a,
+        apply Hof_a_1,
+    },
+    case step.pair2 {
+        cases Hof,
+        apply of.pair,
+        exact Hof_a,
+        apply Hstep_ih Hof_a_1,
+    },
+    case step.fst_step {
+        cases Hof,
+        apply of.fst,
+        apply Hstep_ih Hof_a,
+    },
+    case step.snd_step {
+        cases Hof,
+        apply of.snd,
+        apply Hstep_ih Hof_a,
+    },
+    case step.fst_beta {
+        cases Hof,
+        cases Hof_a,
+        exact Hof_a_a,
+    },
+    case step.snd_beta {
+        cases Hof,
+        cases Hof_a,
+        exact Hof_a_a_1,
+    },
+    case step.cons1 {
+        cases Hof,
+        apply of.cons,
+        apply Hstep_ih Hof_a,
+        exact Hof_a_1,
+    },
+    case step.cons2 {
+        cases Hof,
+        apply of.cons,
+        exact Hof_a,
+        apply Hstep_ih Hof_a_1,
+    },
+    case step.list_match_step {
+        cases Hof,
+        have temp : of Γ Hstep_e' (ty.list Hof_A),
+        apply Hstep_ih Hof_a,
+        apply of.list_match temp Hof_a_1 Hof_a_2,
+    },
+    case step.list_match_nil {
+        cases Hof,
+        exact Hof_a_1,
+    },
+    case step.list_match_cons {
+        cases Hof,
+        cases Hof_a,
+        apply substitution Hof_a_a,
+        apply substitution,
+        apply weakening,
+        assumption,
+        assumption,
+    },
 end
-
 
 theorem progress {e A} :
     of ctx.nil e A ->
@@ -433,5 +500,119 @@ begin
             exact (step.if_then_else h_h),
         }
   },
-  repeat {sorry},
+  case of.pair {
+      cases H_ih_a empty,
+      cases H_ih_a_1 empty,
+      case or.inl {
+          left,
+          apply value.pair,
+          repeat {assumption},
+      },
+      { -- can't specify because it choose the same name :^)
+          right,
+          cases h_1,
+          existsi (tm.pair H_e1 h_1_w),
+          exact (step.pair2 h h_1_h),
+      },
+      {
+          right,
+          cases h,
+          existsi (tm.pair h_w H_e2),
+          exact (step.pair1 h_h),
+      },
+  },
+  case of.nil {
+      left,
+      apply value.nil,
+  },
+  case of.cons {
+      cases H_ih_a empty,
+      {
+          cases H_ih_a_1 empty,
+          case or.inl {
+              left,
+              apply value.cons,
+              repeat {assumption,},
+          },
+          case or.inr {
+              right,
+              cases h_1,
+              existsi (tm.cons H_e h_1_w),
+              exact (step.cons2 h h_1_h),
+          },
+      },
+      {
+          right,
+          cases h,
+          existsi (tm.cons h_w H_es),
+          exact (step.cons1 h_h),
+      }
+  },
+  case of.fst {
+      cases H_ih empty,
+      case or.inl {
+          cases H_a,
+          case of.pair {
+              right,
+              have par : value (tm.pair H_a_e1 H_a_e2), exact h,
+              cases h,
+              existsi (H_a_e1),
+              exact (step.fst_beta par),
+          },
+          repeat {cases h},
+      },
+      case or.inr {
+          right,
+          cases h,
+          existsi (tm.fst h_w),
+          exact (step.fst_step h_h),
+      },
+  },
+  case of.snd {
+      cases H_ih empty,
+      case or.inl {
+          cases H_a,
+          case of.pair {
+              right,
+              have par : value (tm.pair H_a_e1 H_a_e2), exact h,
+              cases h,
+              existsi (H_a_e2),
+              exact (step.snd_beta par),
+          },
+          repeat {cases h},
+      },
+      case or.inr {
+          cases h,
+          right,
+          existsi (tm.snd h_w),
+          exact (step.snd_step h_h),
+      },
+  },
+  case of.list_match {
+      -- can always make a step
+      right,
+      cases H_ih_a empty,
+      case or.inl {
+          cases H_e,
+          case tm.cons {
+              existsi (subst H_x H_e_a (subst H_xs H_e_a_1 H_e2)),
+              exact (step.list_match_cons),
+          },
+          case tm.nil {
+              existsi H_e1,
+              exact (step.list_match_nil),
+          },
+          repeat {
+              cases H_a,
+              },
+          repeat {
+              cases h,
+          },
+      },
+      case or.inr {
+          cases h,
+          existsi (tm.list_match h_w H_e1 H_x H_xs H_e2),
+          exact (step.list_match_step h_h),
+      },
+  },
 end
